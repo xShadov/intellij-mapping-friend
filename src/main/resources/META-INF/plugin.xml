@@ -1,0 +1,17 @@
+<idea-plugin version="1">
+    <id>io.github.xshadov.intellij.mapping-friend</id>
+    <name>Intellij-Mapping-Friend</name>
+
+    <idea-version since-build="183"/>
+
+    <vendor>xshadov</vendor>
+    <description>Helpers for writting DTO mappers with lombok builders</description>
+
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <intentionAction>
+            <className>io.github.xshadov.intellij.mappingfriend.actions.GenerateBuilderCallsAction</className>
+        </intentionAction>
+    </extensions>
+</idea-plugin>

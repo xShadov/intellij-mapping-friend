@@ -1,0 +1,27 @@
+Something something = Something.builder()
+	.primitive() //required
+	.primitiveWrapperRequired() //required
+	.primitiveWrapperOptional() //optional
+	.complex(complex()) //optional
+	.build();
+	
+Complex complex() {
+	return Complex.builder()
+	...
+	.build();
+}
+
+Basic:
+1. Delete ; to have it in one line
+2. Generate required/optional
+3. Support for other 'builder' and 'build' method names
+4. Indentation
+5. Methods for complex objects (check scope of current if static or not) and then go deeper, filling whole tree
+6. Configs for all those options
+7. Maybe as a postfix (.builderFill or something, easier to use)
+
+
+
+Advanced:
+1. Check current code if builders are fully filled
+2. Make point 1 as a code inspection during scanning
