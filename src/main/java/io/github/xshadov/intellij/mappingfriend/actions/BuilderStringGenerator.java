@@ -17,17 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class BuilderStringGenerator {
+public class BuilderStringGenerator {
 	private static final Logger logger = Logger.getInstance(BuilderStringGenerator.class);
 	private static final String BUILDER_METHOD_CALL_TEMPLATE = ".%s() // (%s)\n";
 
 	@NotNull
-	static String generate(final @NotNull PsiElement element) {
+	public static String generate(final @NotNull PsiElement element) {
 		final PsiClass classOfLocalVariable = PsiHelper.classOfLocalVariable(element)
 				.orElseThrow(() -> new IllegalStateException("isAvailable returned true and this situation should not occur"));
 
 		final List<PsiMethod> builderMethods = PsiMethodsHelper.all(classOfLocalVariable, MethodPredicates.isBuilder());
-
 		if (builderMethods.size() != 1)
 			throw new IllegalStateException("Should have exactly 1 builder method");
 
@@ -35,17 +34,31 @@ class BuilderStringGenerator {
 		final PsiClass classOfBuilder = PsiTypesUtil.getPsiClass(builderMethod.getReturnType());
 
 		// start the builder
-		final StringBuilder builderString = new StringBuilder(String.format("=%s.builder()\n", classOfLocalVariable.getQualifiedName()));
+		final StringBuilder builderString = new StringBuilder(builderStart(classOfLocalVariable));
 
-		final Map<String, Boolean> fieldOptionalities = PsiFieldsHelper.fieldOptionalities(classOfLocalVariable, classOfBuilder);
 		// list all the fields
-		final List<PsiMethod> builderFieldMethods = PsiMethodsHelper.all(classOfBuilder, MethodPredicates.builderField());
-		builderFieldMethods.forEach(method -> builderString.append(fieldString(fieldOptionalities, method)));
+		builderString.append(fieldChain(classOfLocalVariable, classOfBuilder));
 
 		// finish builder
-		builderString.append(".build();\n");
+		builderString.append(buildFinish());
 
 		return builderString.toString();
+	}
+
+	public static String builderStart(final PsiClass topClass) {
+		return String.format("=%s.builder()\n", topClass.getQualifiedName());
+	}
+
+	public static String fieldChain(final PsiClass topClass, final PsiClass builderClass) {
+		final Map<String, Boolean> fieldOptionalities = PsiFieldsHelper.fieldOptionalities(topClass, builderClass);
+
+		return PsiMethodsHelper.all(builderClass, MethodPredicates.builderField()).stream()
+				.map(method -> fieldString(fieldOptionalities, method))
+				.collect(Collectors.joining());
+	}
+
+	public static String buildFinish() {
+		return ".build();";
 	}
 
 	private static String fieldString(final Map<String, Boolean> fields, final PsiMethod method) {
