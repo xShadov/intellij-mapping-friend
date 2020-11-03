@@ -1,9 +1,11 @@
-package io.github.xshadov.intellij.mappingfriend.actions;
+package io.github.xshadov.intellij.mappingfriend.logic;
 
 import com.google.common.base.Joiner;
+import com.intellij.codeInsight.template.postfix.util.JavaPostfixTemplatesUtils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiExpression;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTypesUtil;
 import io.github.xshadov.intellij.mappingfriend.helpers.MethodPredicates;
@@ -18,38 +20,49 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class BuilderStringGenerator {
-	private static final Logger logger = Logger.getInstance(BuilderStringGenerator.class);
 	private static final String BUILDER_METHOD_CALL_TEMPLATE = ".%s() // (%s)\n";
 
-	@NotNull
-	public static String generate(final @NotNull PsiElement element) {
-		final PsiClass classOfLocalVariable = PsiHelper.classOfLocalVariable(element)
-				.orElseThrow(() -> new IllegalStateException("isAvailable returned true and this situation should not occur"));
+	public static BuilderGenerationResponse fromExpression(@NotNull PsiExpression expression) {
+		final PsiClass builderClass = PsiTypesUtil.getPsiClass(expression.getType());
 
-		final List<PsiMethod> builderMethods = PsiMethodsHelper.all(classOfLocalVariable, MethodPredicates.isBuilder());
+		final List<PsiMethod> hasBuildMethod = PsiMethodsHelper.all(builderClass, MethodPredicates.isBuild());
+		if (hasBuildMethod.size() != 1)
+			throw new IllegalArgumentException("Builder needs exactly 1 build method");
+
+		final PsiMethod buildMethod = hasBuildMethod.get(0);
+
+		final PsiClass ownerClass = PsiTypesUtil.getPsiClass(buildMethod.getReturnType());
+
+		return fromTopClass(ownerClass);
+	}
+
+	public static BuilderGenerationResponse fromLocalVariable(@NotNull PsiElement localVariable) {
+		final PsiClass ownerClass = PsiHelper.classOfLocalVariable(localVariable)
+				.orElseThrow(() -> new IllegalArgumentException("Input is not a local variable element"));
+
+		return fromTopClass(ownerClass);
+	}
+
+	public static BuilderGenerationResponse fromTopClass(@NotNull PsiClass topClass) {
+		final List<PsiMethod> builderMethods = PsiMethodsHelper.all(topClass, MethodPredicates.isBuilder());
 		if (builderMethods.size() != 1)
 			throw new IllegalStateException("Should have exactly 1 builder method");
 
 		final PsiMethod builderMethod = builderMethods.get(0);
-		final PsiClass classOfBuilder = PsiTypesUtil.getPsiClass(builderMethod.getReturnType());
+		final PsiClass builderClass = PsiTypesUtil.getPsiClass(builderMethod.getReturnType());
 
-		// start the builder
-		final StringBuilder builderString = new StringBuilder(builderStart(classOfLocalVariable));
-
-		// list all the fields
-		builderString.append(fieldChain(classOfLocalVariable, classOfBuilder));
-
-		// finish builder
-		builderString.append(buildFinish());
-
-		return builderString.toString();
+		return BuilderGenerationResponse.builder()
+				.builderStart(builderStart(topClass))
+				.fieldChain(fieldChain(topClass, builderClass))
+				.builderEnd(buildFinish())
+				.build();
 	}
 
-	public static String builderStart(final PsiClass topClass) {
+	private static String builderStart(PsiClass topClass) {
 		return String.format("=%s.builder()\n", topClass.getQualifiedName());
 	}
 
-	public static String fieldChain(final PsiClass topClass, final PsiClass builderClass) {
+	private static String fieldChain(PsiClass topClass, PsiClass builderClass) {
 		final Map<String, Boolean> fieldOptionalities = PsiFieldsHelper.fieldOptionalities(topClass, builderClass);
 
 		return PsiMethodsHelper.all(builderClass, MethodPredicates.builderField()).stream()
@@ -57,11 +70,11 @@ public class BuilderStringGenerator {
 				.collect(Collectors.joining());
 	}
 
-	public static String buildFinish() {
+	private static String buildFinish() {
 		return ".build();";
 	}
 
-	private static String fieldString(final Map<String, Boolean> fields, final PsiMethod method) {
+	private static String fieldString(Map<String, Boolean> fields, PsiMethod method) {
 		final List<String> fieldsFromParameters = Arrays.stream(method.getParameterList().getParameters())
 				.map(param -> fields.get(param.getName()))
 				.map(BuilderStringGenerator::optionalityOfField)
@@ -77,10 +90,7 @@ public class BuilderStringGenerator {
 		return String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName(), "unknown");
 	}
 
-	@NotNull
-	private static String optionalityOfField(final Boolean fieldOptionality) {
+	private static String optionalityOfField(Boolean fieldOptionality) {
 		return fieldOptionality == null ? "unknown" : fieldOptionality ? "required" : "optional";
 	}
-
-
 }
