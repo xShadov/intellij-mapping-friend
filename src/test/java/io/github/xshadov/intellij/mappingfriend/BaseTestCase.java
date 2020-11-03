@@ -7,7 +7,7 @@ import com.intellij.util.PathUtil;
 
 import java.io.File;
 
-public class BaseTestCase extends LightPlatformCodeInsightFixtureTestCase {
+public abstract class BaseTestCase extends LightPlatformCodeInsightFixtureTestCase {
 	private static final String THIRD_PARTY_LIB_DIRECTORY = "lib";
 	private static final String LOMBOK_JAR_NAME = "lombok-1.18.16.jar";
 

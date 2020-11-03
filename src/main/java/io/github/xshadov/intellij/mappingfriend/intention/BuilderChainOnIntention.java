@@ -1,27 +1,23 @@
-package io.github.xshadov.intellij.mappingfriend.actions;
+package io.github.xshadov.intellij.mappingfriend.intention;
 
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiDeclarationStatement;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
-import io.github.xshadov.intellij.mappingfriend.helpers.MethodPredicates;
 import io.github.xshadov.intellij.mappingfriend.helpers.PsiElementsHelper;
-import io.github.xshadov.intellij.mappingfriend.helpers.PsiHelper;
-import io.github.xshadov.intellij.mappingfriend.helpers.PsiMethodsHelper;
 import io.github.xshadov.intellij.mappingfriend.logic.BuilderGenerationResponse;
 import io.github.xshadov.intellij.mappingfriend.logic.BuilderStringGenerator;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 
-public class GenerateBuilderCallsAction extends PsiElementBaseIntentionAction {
+public class BuilderChainOnIntention extends PsiElementBaseIntentionAction {
 	@Override
 	public boolean isAvailable(@NotNull final Project project, final Editor editor, @NotNull final PsiElement element) {
 		return PsiElementsHelper.isBuilderClass(element);

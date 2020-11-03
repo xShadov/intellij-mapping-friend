@@ -11,7 +11,7 @@
 
 	<extensions defaultExtensionNs="com.intellij">
 		<intentionAction>
-			<className>io.github.xshadov.intellij.mappingfriend.actions.GenerateBuilderCallsAction</className>
+			<className>io.github.xshadov.intellij.mappingfriend.intention.BuilderChainOnIntention</className>
 		</intentionAction>
 
 		<codeInsight.template.postfixTemplateProvider

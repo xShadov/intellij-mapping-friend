@@ -17,7 +17,7 @@ public class ElementPredicates {
 				.filter(methods -> methods.size() == 1)
 				.map(methods -> methods.get(0))
 				.map(buildMethod -> PsiTypesUtil.getPsiClass(buildMethod.getReturnType()))
-				.map(ownerClass -> PsiMethodsHelper.has(ownerClass, MethodPredicates.isBuild()))
+				.map(ownerClass -> PsiMethodsHelper.has(ownerClass, MethodPredicates.isBuilder()))
 				.orElse(false);
 	}
 
