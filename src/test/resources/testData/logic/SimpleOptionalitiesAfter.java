@@ -1,6 +1,14 @@
 public class Simple {
     public void method() {
-        TestData data = TestData.builder()<caret>
+        TestData data = TestData.builder()
+                .one() // (required)
+                .two() // (optional)
+                .three() // (required)
+                .four() // (required)
+                .six() // (optional)
+                .whereIsFive() // (required)
+                .wrappersCanBeOptional() // (optional)
+                .build();
     }
 
     @lombok.Value
@@ -14,5 +22,6 @@ public class Simple {
         private Integer four;
         private String six;
         private boolean whereIsFive;
+        private Integer wrappersCanBeOptional;
     }
 }

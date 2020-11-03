@@ -3,9 +3,9 @@ package io.github.xshadov.intellij.mappingfriend.logic;
 import io.github.xshadov.intellij.mappingfriend.BaseTestCase;
 import lombok.NonNull;
 
-public class OptionalitiesTest extends BaseTestCase {
-	public void testSimple() {
-		testByName("SimpleOptionalities");
+public class ComplexOptionalitiesTest extends BaseTestCase {
+	public void testComplex() {
+		testByName("ComplexOptionalities");
 	}
 
 	private void testByName(@NonNull String name) {
