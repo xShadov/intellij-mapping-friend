@@ -1,4 +1,4 @@
-package io.github.xshadov.intellij.mappingfriend.postfix;
+package io.github.xshadov.intellij.mappingfriend.infrastructure.postfix;
 
 import com.intellij.codeInsight.template.postfix.templates.PostfixTemplate;
 import com.intellij.codeInsight.template.postfix.util.JavaPostfixTemplatesUtils;

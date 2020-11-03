@@ -1,4 +1,4 @@
-package io.github.xshadov.intellij.mappingfriend.intention;
+package io.github.xshadov.intellij.mappingfriend.infrastructure.intention;
 
 import com.intellij.codeInsight.intention.PsiElementBaseIntentionAction;
 import com.intellij.openapi.command.WriteCommandAction;

@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BuilderStringGenerator {
@@ -77,6 +78,7 @@ public class BuilderStringGenerator {
 	private static String fieldString(Map<String, Boolean> fields, PsiMethod method) {
 		final List<String> fieldsFromParameters = Arrays.stream(method.getParameterList().getParameters())
 				.map(param -> fields.get(param.getName()))
+				.filter(Objects::nonNull)
 				.map(BuilderStringGenerator::optionalityOfField)
 				.collect(Collectors.toList());
 

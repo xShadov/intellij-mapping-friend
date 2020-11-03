@@ -11,11 +11,11 @@
 
 	<extensions defaultExtensionNs="com.intellij">
 		<intentionAction>
-			<className>io.github.xshadov.intellij.mappingfriend.intention.BuilderChainOnIntention</className>
+			<className>io.github.xshadov.intellij.mappingfriend.infrastructure.intention.BuilderChainOnIntention</className>
 		</intentionAction>
 
 		<codeInsight.template.postfixTemplateProvider
 				language="JAVA"
-				implementationClass="io.github.xshadov.intellij.mappingfriend.postfix.MappingFriendPosfixTemplateProvider"/>
+				implementationClass="io.github.xshadov.intellij.mappingfriend.infrastructure.postfix.MappingFriendPosfixTemplateProvider"/>
 	</extensions>
 </idea-plugin>

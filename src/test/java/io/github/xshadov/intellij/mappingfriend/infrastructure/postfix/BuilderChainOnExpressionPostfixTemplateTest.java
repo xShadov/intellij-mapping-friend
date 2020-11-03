@@ -1,4 +1,4 @@
-package io.github.xshadov.intellij.mappingfriend.postfix;
+package io.github.xshadov.intellij.mappingfriend.infrastructure.postfix;
 
 import io.github.xshadov.intellij.mappingfriend.BaseTestCase;
 import lombok.NonNull;
@@ -9,11 +9,11 @@ public class BuilderChainOnExpressionPostfixTemplateTest extends BaseTestCase {
 	}
 
 	private void testByName(@NonNull String name) {
-		myFixture.configureByFile("postfix/expression/" + name + "Before.java");
+		myFixture.configureByFile("infrastructure/postfix/expression/" + name + "Before.java");
 
 		myFixture.type(".generateBuilderChainCall\t");
 
-		myFixture.checkResultByFile("postfix/expression/" + name + "After.java");
+		myFixture.checkResultByFile("infrastructure/postfix/expression/" + name + "After.java");
 	}
 }
 

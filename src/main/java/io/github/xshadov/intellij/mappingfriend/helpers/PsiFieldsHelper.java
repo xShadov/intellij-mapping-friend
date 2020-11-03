@@ -13,15 +13,19 @@ public class PsiFieldsHelper {
 		return FieldPredicates.hasJavaxNotNull().test(param);
 	}
 
+	private static boolean isRequired(@NonNull PsiField field) {
+		return FieldPredicates.isRequired().test(field);
+	}
+
 	public static Map<String, Boolean> fieldOptionalities(final PsiClass classOfLocalVariable, final PsiClass classOfBuilder) {
 		final Map<String, PsiField> classFields = Arrays.stream(classOfLocalVariable.getFields())
 				.collect(Collectors.toMap(PsiField::getName, field -> field));
 
 		final Map<String, Boolean> builderClassFields = Arrays.stream(classOfBuilder.getFields())
-				.collect(Collectors.toMap(PsiField::getName, PsiFieldsHelper::isJavaxRequired));
+				.collect(Collectors.toMap(PsiField::getName, PsiFieldsHelper::isRequired));
 
 		classFields.forEach((name, field) -> {
-			builderClassFields.merge(name, PsiFieldsHelper.isJavaxRequired(field), (oldValue, newValue) -> oldValue || newValue);
+			builderClassFields.merge(name, PsiFieldsHelper.isRequired(field), (oldValue, newValue) -> oldValue || newValue);
 		});
 
 		return builderClassFields;
