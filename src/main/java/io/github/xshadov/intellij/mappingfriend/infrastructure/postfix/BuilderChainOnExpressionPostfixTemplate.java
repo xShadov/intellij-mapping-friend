@@ -1,7 +1,6 @@
 package io.github.xshadov.intellij.mappingfriend.infrastructure.postfix;
 
 import com.intellij.codeInsight.template.postfix.templates.PostfixTemplate;
-import com.intellij.codeInsight.template.postfix.util.JavaPostfixTemplatesUtils;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.psi.PsiDocumentManager;
@@ -9,6 +8,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import io.github.xshadov.intellij.mappingfriend.helpers.PsiElementsHelper;
+import io.github.xshadov.intellij.mappingfriend.helpers.PsiExpressionsHelper;
 import io.github.xshadov.intellij.mappingfriend.logic.BuilderGenerationResponse;
 import io.github.xshadov.intellij.mappingfriend.logic.BuilderStringGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,8 @@ public class BuilderChainOnExpressionPostfixTemplate extends PostfixTemplate {
 
 	@Override
 	public void expand(@NotNull final PsiElement context, @NotNull final Editor editor) {
-		final PsiExpression topmostExpression = JavaPostfixTemplatesUtils.getTopmostExpression(context);
+		final PsiExpression topmostExpression = PsiExpressionsHelper.builderMethodExpression(context)
+				.orElseThrow(() -> new IllegalStateException("This should not happen, isApplicable must be false-positive"));
 
 		final BuilderGenerationResponse generatedBuilder = BuilderStringGenerator.fromExpression(topmostExpression);
 		final String builderString = String.format("\n%s%s", generatedBuilder.getFieldChain(), generatedBuilder.getBuilderEnd());

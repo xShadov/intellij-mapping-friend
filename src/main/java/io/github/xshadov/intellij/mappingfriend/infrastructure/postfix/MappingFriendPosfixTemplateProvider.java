@@ -13,7 +13,10 @@ public class MappingFriendPosfixTemplateProvider implements PostfixTemplateProvi
 	@NotNull
 	@Override
 	public Set<PostfixTemplate> getTemplates() {
-		return Sets.newHashSet(new BuilderChainOnExpressionPostfixTemplate(), new BuilderChainOnDeclarationPostfixTemplate());
+		return Sets.newHashSet(
+				new BuilderChainOnExpressionPostfixTemplate(),
+				new BuilderChainOnDeclarationPostfixTemplate()
+		);
 	}
 
 	@Override
