@@ -4,7 +4,7 @@ public class Simple {
     }
 
     @lombok.Value
-    @lombok.Builder
+    @lombok.Builder(builderClassName = "Builder")
     public static class TestData {
         @javax.validation.constraints.NotNull
         private String one;
@@ -15,5 +15,19 @@ public class Simple {
         private String six;
         private boolean whereIsFive;
         private Integer wrappersCanBeOptional;
+        @javax.validation.constraints.NotNull
+        private String seven;
+        private String eight;
+        private boolean nine;
+
+        public static class Builder {
+            public Builder withNoParams() {
+                return this;
+            }
+
+            public Builder withManyParams(String seven, String eight, boolean nine) {
+                return this;
+            }
+        }
     }
 }

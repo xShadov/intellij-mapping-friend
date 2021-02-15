@@ -8,6 +8,10 @@ public class OptionalitiesTest extends BaseTestCase {
 		testByName("SimpleOptionalities");
 	}
 
+	public void testComplex() {
+		testByName("ComplexOptionalities");
+	}
+
 	private void testByName(@NonNull String name) {
 		myFixture.configureByFile("logic/" + name + "Before.java");
 

@@ -1,8 +1,10 @@
 public class Complex {
     public void method() {
         TestData data = TestData.builder()
-                .otherData() // (required)
-                .otherDataOptional() // (optional)
+                // (required)
+                .otherData()
+                // (optional)
+                .otherDataOptional()
                 .build();
     }
 

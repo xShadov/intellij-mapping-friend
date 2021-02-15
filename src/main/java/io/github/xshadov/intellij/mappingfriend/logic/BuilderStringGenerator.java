@@ -1,8 +1,6 @@
 package io.github.xshadov.intellij.mappingfriend.logic;
 
 import com.google.common.base.Joiner;
-import com.intellij.codeInsight.template.postfix.util.JavaPostfixTemplatesUtils;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiExpression;
@@ -12,16 +10,19 @@ import io.github.xshadov.intellij.mappingfriend.helpers.MethodPredicates;
 import io.github.xshadov.intellij.mappingfriend.helpers.PsiFieldsHelper;
 import io.github.xshadov.intellij.mappingfriend.helpers.PsiHelper;
 import io.github.xshadov.intellij.mappingfriend.helpers.PsiMethodsHelper;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BuilderStringGenerator {
-	private static final String BUILDER_METHOD_CALL_TEMPLATE = ".%s() // (%s)\n";
+	private static final String BUILDER_METHOD_CALL_TEMPLATE = ".%s()\n";
+	private static final String MULTIPLE_PARAMETERS_BUILDER_METHOD_CALL_TEMPLATE = ".%s() // (%s)\n";
 
 	public static BuilderGenerationResponse fromExpression(@NotNull PsiExpression expression) {
 		final PsiClass builderClass = PsiTypesUtil.getPsiClass(expression.getType());
@@ -66,33 +67,42 @@ public class BuilderStringGenerator {
 	private static String fieldChain(PsiClass topClass, PsiClass builderClass) {
 		final Map<String, Boolean> fieldOptionalities = PsiFieldsHelper.fieldOptionalities(topClass, builderClass);
 
-		return PsiMethodsHelper.all(builderClass, MethodPredicates.builderField()).stream()
+		final Map<OptionalityType, List<String>> linesWithOptionalities = PsiMethodsHelper.all(builderClass, MethodPredicates.builderField()).stream()
 				.map(method -> fieldString(fieldOptionalities, method))
-				.collect(Collectors.joining());
+				.collect(Collectors.groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
+
+		final List<String> finalLines = Lists.newArrayList();
+		for (OptionalityType type : OptionalityType.values()) {
+			if (!linesWithOptionalities.getOrDefault(type, Collections.emptyList()).isEmpty()) {
+				// adding \t here because of formatting option 'keep comment in first column when reformatting'
+				// this bypasses this option to allow comment to be formatted same as builder method calls
+				finalLines.add(String.format("\t// (%s)\n", type.name().toLowerCase()));
+				finalLines.addAll(linesWithOptionalities.get(type));
+			}
+		}
+
+		return Joiner.on("").join(finalLines);
 	}
 
 	private static String buildFinish() {
 		return ".build();";
 	}
 
-	private static String fieldString(Map<String, Boolean> fields, PsiMethod method) {
-		final List<String> fieldsFromParameters = Arrays.stream(method.getParameterList().getParameters())
+	private static Pair<OptionalityType, String> fieldString(Map<String, Boolean> fields, PsiMethod method) {
+		if (method.getParameterList().getParametersCount() == 0)
+			return Pair.of(OptionalityType.NO_PARAMETERS, String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName()));
+
+		final List<OptionalityType> fieldsFromParameters = Arrays.stream(method.getParameterList().getParameters())
 				.map(param -> fields.get(param.getName()))
-				.filter(Objects::nonNull)
-				.map(BuilderStringGenerator::optionalityOfField)
+				.map(OptionalityType::of)
 				.collect(Collectors.toList());
 
-		if (fieldsFromParameters.size() == method.getParameterList().getParametersCount())
-			return String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName(), Joiner.on(", ").join(fieldsFromParameters));
+		if (fieldsFromParameters.size() == 1)
+			return Pair.of(fieldsFromParameters.get(0), String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName()));
 
-		final Boolean foundField = fields.get(method.getName());
-		if (foundField != null)
-			return String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName(), optionalityOfField(foundField));
-
-		return String.format(BUILDER_METHOD_CALL_TEMPLATE, method.getName(), "unknown");
-	}
-
-	private static String optionalityOfField(Boolean fieldOptionality) {
-		return fieldOptionality == null ? "unknown" : fieldOptionality ? "required" : "optional";
+		final String requirements = Joiner.on(", ").join(fieldsFromParameters.stream()
+				.map(val -> val.name().toLowerCase()).collect(Collectors.toList()));
+		return Pair.of(OptionalityType.MULTIPLE_PARAMETERS,
+				String.format(MULTIPLE_PARAMETERS_BUILDER_METHOD_CALL_TEMPLATE, method.getName(), requirements));
 	}
 }

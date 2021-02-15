@@ -1,8 +1,9 @@
 public class Simple {
     public TestData method() {
         return TestData.builder()
-                .one() // (optional)
-                .two() // (optional)
+                // (optional)
+                .one()
+                .two()
                 .build();
     }
 
